@@ -22,7 +22,7 @@
             <div class="mb-3">
                 @foreach (var category in Model.Categories)
                 {
-                    <a href="/blogs/tag/@category.Url"
+                    <a href="category/@category.Url"
                        class="badge bg-@category.Color bg-opacity-10 text-@category.Color mb-2 fw-bold">@category.Text</a>
                 }
             </div>
