@@ -1,5 +1,8 @@
 # BlogAppMVC
 
+### 📹 Proje Tanıtım Videosu
+[![Proje Tanıtım Videosu](https://img.youtube.com/vi/abc123XYZ/0.jpg)](https://youtu.be/Ys0rumMuq44)
+
 ## Proje Özeti
 
 Bu proje, .NET Core MVC ve Entity Framework Core kullanarak geliştirilmiş bir blog sitesidir. Kullanıcılar kayıt olabilir, giriş yapabilir, blog yazıları oluşturabilir ve bu yazılar üzerinde CRUD işlemleri yapabilir. Blog yazıları başlık, içerik, yazar, yayınlanma tarihi, kategori ve opsiyonel görsel içerir. Sadece giriş yapan kullanıcılar yeni blog yazıları oluşturabilir, düzenleyebilir ve silebilir.
