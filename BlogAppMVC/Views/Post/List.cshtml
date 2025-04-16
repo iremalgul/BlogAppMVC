@@ -1,0 +1,147 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+@model List<PostDTO>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h2 class="mb-2">Yazılar</h2>
+        <a href="/post/create" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Yeni Yazı
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 120px;">Resim</th>
+                        <th>Başlık</th>
+                        <th>Yazar</th>
+                        <th>Aktif</th>
+                        <th class="text-end" style="width: 200px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderByDescending(p => p.PostId))
+                    {
+                        <tr>
+                            <td>
+                                <img src="~/img/@item.Image"
+                                     class="img-fluid rounded shadow-sm"
+                                     style="width: 100px; height: 60px; object-fit: cover;"
+                                     alt="@item.Title" />
+                            </td>
+                            <td class="fw-semibold">@item.Title</td>
+                            <td>
+                                <a href="/profile/@item.User.UserName" class="d-flex align-items-center text-decoration-none">
+                                    <img src="~/img/@item.User.Image"
+                                         alt="@item.User.UserName"
+                                         class="rounded-circle me-2"
+                                         style="width: 30px; height: 30px; object-fit: cover;" />
+                                    <span>@item.User.UserName</span>
+                                </a>
+                            </td>
+
+                            <td>
+                                <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(item.IsActive ? "Evet" : "Hayır")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a asp-controller="Post"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.PostId"
+                                   class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="bi bi-pencil-square me-1"></i> Güncelle
+                                </a>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger btn-delete-post"
+                                        data-id="@item.PostId">
+                                    <i class="bi bi-trash me-1"></i> Sil
+                                </button>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-4">
+            <i class="bi bi-info-circle me-1"></i> Henüz bir yazı eklenmemiş.
+        </div>
+    }
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let selectedPostId = null;
+            let selectedButton = null;
+
+            const deleteModalEl = document.getElementById("deleteConfirmModal");
+            const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+            // Her sil butonuna click event'i ata
+            document.querySelectorAll(".btn-delete-post").forEach(button => {
+                button.addEventListener("click", function () {
+                    selectedPostId = this.dataset.id;
+                    selectedButton = this;
+                    deleteModal.show();
+                });
+            });
+
+            // "Evet, Sil" butonuna tıklanırsa
+            document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+                if (!selectedPostId) return;
+
+                fetch("/Post/Delete", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `id=${selectedPostId}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Satırı kaldır
+                            selectedButton.closest("tr").remove();
+                            deleteModal.hide();
+
+                            // Başarıyla silindiği mesajını göster
+                            const successModalEl = document.getElementById('successModal');
+                            if (successModalEl) {
+                                const successModal = new bootstrap.Modal(successModalEl);
+                                const successModalBody = successModalEl.querySelector('.modal-body');
+                                if (successModalBody) {
+                                    successModalBody.textContent = data.message; // Sunucudan dönen mesajı kullan
+                                }
+                                successModal.show();
+
+                                // 2 saniye sonra başarı modali kapanacak
+                                setTimeout(() => {
+                                    successModal.hide();
+                                }, 2000);
+                            }
+                        } else {
+                            alert(data.message || "Silme işlemi başarısız oldu.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Hata:", error);
+                        alert("Bir hata oluştu.");
+                    });
+            });
+        });
+    </script>
+}
+
+

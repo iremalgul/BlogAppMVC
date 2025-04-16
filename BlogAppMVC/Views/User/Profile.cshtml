@@ -1,0 +1,158 @@
+﻿@{
+    Layout = "_Layout";
+}
+@model UserDTO
+
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Profil Kartı -->
+        <div class="col-md-4 col-lg-3">
+            <div class="card text-center shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <img src="~/img/@Model.Image" class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" alt="@Model.Name" />
+                    <h5 class="card-title">@Model.Name</h5>
+                    <p class="text-muted">@Model.UserName</p>
+
+                   
+                </div>
+            </div>
+        </div>
+
+        <!-- Gönderiler ve Yorumlar -->
+        <div class="col-md-8 col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <!-- Kullanıcının Yayınladığı Gönderiler -->
+                    <h5 class="card-title mb-4">Yayınlanan Gönderiler</h5>
+                    @if (Model.Posts != null && Model.Posts.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var post in Model.Posts)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-caret-right-fill text-primary me-2"></i>
+                                        <a class="text-decoration-none text-dark fw-semibold" href="/blogs/@post.Url">@post.Title</a>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz gönderi yok.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Kullanıcının Yorum Yaptığı Gönderiler -->
+            <div class="card shadow-sm border-0 rounded-4 mt-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Yorum Yapılan Gönderiler</h5>
+                    @if (Model.Comments != null && Model.Comments.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var comment in Model.Comments)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start">
+                                        <div class="d-flex">
+                                            <img src="~/img/@Model.Image" class="avatar rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" alt="@Model.Image" />
+                                            <div>
+                                                <a href="/blogs/@comment.Post.Url" class="fw-semibold text-decoration-none text-dark">
+                                                    @comment.Post.Title
+                                                </a>
+                                                <p class="text-muted small mb-1">@comment.PublishedOn.ToString("dd MMM yyyy")</p>
+                                                <p class="mb-1">@comment.Text</p>
+                                            </div>
+                                        </div>
+                                        @if (User.Identity.IsAuthenticated && User.Identity.Name == Model.UserName)
+                                        {
+                                            <form method="post" class="delete-comment-form ms-sm-3 mt-2 mt-sm-0" data-comment-id="@comment.CommentId">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Sil
+                                                </button>
+                                            </form>
+                                        }
+
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz yorum yapılmamış.</p>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let selectedCommentId = null;
+            let selectedButton = null;
+
+            const deleteModalEl = document.getElementById("deleteConfirmModal");
+            const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+            // Her sil butonuna click event'i ata
+            document.querySelectorAll(".delete-comment-form button").forEach(button => {
+                button.addEventListener("click", function (event) {
+                    event.preventDefault(); // Formun otomatik gönderimini engelle
+                    selectedCommentId = this.closest("form").dataset.commentId;
+                    selectedButton = this;
+                    deleteModal.show();
+                });
+            });
+
+            // "Evet, Sil" butonuna tıklanırsa
+            document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+                if (!selectedCommentId) return;
+
+                fetch("/Post/DeleteComment", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `id=${selectedCommentId}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Yorum satırını kaldır
+                            selectedButton.closest("li").remove();
+                            deleteModal.hide();
+
+                            // Başarıyla silindiği mesajını göster
+                            const successModalEl = document.getElementById('successModal');
+                            if (successModalEl) {
+                                const successModal = new bootstrap.Modal(successModalEl);
+                                const successModalBody = successModalEl.querySelector('.modal-body');
+                                if (successModalBody) {
+                                    successModalBody.textContent = data.message; // Sunucudan dönen mesajı kullan
+                                }
+                                successModal.show();
+
+                                // 2 saniye sonra başarı modali kapanacak
+                                setTimeout(() => {
+                                    successModal.hide();
+                                }, 2000);
+                            }
+                        } else {
+                            alert(data.message || "Silme işlemi başarısız oldu.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Hata:", error);
+                        alert("Bir hata oluştu.");
+                    });
+            });
+        });
+    </script>
+}

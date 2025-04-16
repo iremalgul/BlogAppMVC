@@ -1,0 +1,87 @@
+﻿@model PostCreateViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            <div class="bg-white p-5 shadow rounded">
+                <h2 class="mb-4 text-center">Yeni yazı ekle</h2>
+
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Title -->
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label">Başlık</label>
+                        <input asp-for="Title" class="form-control" placeholder="Başlık giriniz">
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label">Açıklama</label>
+                        <input asp-for="Description" class="form-control" placeholder="Açıklama giriniz">
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <!-- URL -->
+                    <div class="mb-4">
+                        <label asp-for="Url" class="form-label">URL</label>
+                        <input asp-for="Url" class="form-control" placeholder="Özel url giriniz">
+                        <span asp-validation-for="Url" class="text-danger"></span>
+                    </div>
+
+                    <!-- Category Selection -->
+                    
+                    <div class="mb-4">
+                        <label asp-for="SelectedCategoryIds" class="form-label">Kategoriler</label>
+                        <select asp-for="SelectedCategoryIds" asp-items="Model.CategoryList" class="form-select" multiple="multiple" id="categorySelect" style="width: 100%;">
+                            <!-- Kategoriler burada olacak -->
+                        </select>
+                        <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
+                    </div>
+
+
+
+                    <!-- Content -->
+                    <div class="mb-4">
+                        <label asp-for="Content" class="form-label">İçerik</label>
+                        <textarea asp-for="Content" class="form-control tinymce" rows="10" placeholder="İçeriği yazınız"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="mb-4">
+                        <label for="Image" class="form-label">Resim Yükle</label>
+                        <input type="file" class="form-control" id="Image" name="Image" accept="image/*">
+                        <span asp-validation-for="Image" class="text-danger"></span>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Ekle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/tinymce/js/tinymce/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '.tinymce',
+            menubar: false,
+            plugins: 'lists link image media table code',
+            toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#categorySelect').select2({
+                placeholder: "Kategori seçin",
+                allowClear: true
+            });
+        });
+    </script>
+}

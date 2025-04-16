@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - BlogApp</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css">
+
+    <!-- Custom CSS () -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="/">
+                <i class="bi bi-code-slash"></i> BlogApp
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent" aria-controls="navbarContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/post/list"><i class="bi bi-file-text"></i> Yazılar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile/@User.Identity.Name"><i class="bi bi-person-circle"></i> @User.Identity.Name</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/logout"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/login"><i class="bi bi-box-arrow-in-right"></i> Giriş</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/register"><i class="bi bi-person-plus"></i> Kayıt Ol</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <!-- Başarılı mesaj modalı -->
+   
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-success text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">Başarılı</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <div class="modal-body">
+                        @TempData["SuccessMessage"]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+   
+
+    <!-- Hata mesajı modalı -->
+    
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-danger text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalLabel">Hata</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <div class="modal-body">
+                        @TempData["ErrorMessage"]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    
+
+    <!-- Silme Onay Modali -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">Yazıyı Sil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    Silmek istediğinizden emin misiniz?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Evet, Sil</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- FOOTER -->
+    <footer class="bg-light text-muted mt-5 py-3 border-top">
+        <div class="container text-center">
+            &copy; @DateTime.Now.Year - BlogApp</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Sadece TempData["SuccessMessage"] doluysa successModal'ı göster
+            var successModalEl = document.getElementById('successModal');
+            if (successModalEl && '@TempData["SuccessMessage"]' !== '') {
+                var successModal = new bootstrap.Modal(successModalEl);
+                successModal.show();
+            }
+
+            // Hata mesajı modalını göster
+            var errorModalEl = document.getElementById('errorModal');
+            if (errorModalEl && '@TempData["ErrorMessage"]' !== '') {
+                var errorModal = new bootstrap.Modal(errorModalEl);
+                errorModal.show();
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,228 @@
+﻿@{
+    Layout = "_Layout";
+}
+@model PostDTO
+<div class="row">
+    <!-- Main content -->
+    <div class="col-lg-8">
+        <div class="bg-white p-4 shadow-sm rounded">
+            <h1 class="h3 mb-3 text-primary">@Model.Title</h1>
+
+            <!-- Author Section -->
+            <div class="mb-3 text-muted">
+                <small>
+                    <strong>Yazar:</strong>
+                    <a href="/profile/@Model.User.UserName" class="text-decoration-none fw-semibold">@Model.User.UserName</a>
+                    <img src="~/img/@Model.User.Image" class="avatar rounded-circle ms-2" alt="Yazar Resmi" style="width: 30px; height: 30px;">
+                </small>
+            </div>
+
+
+            <!-- Tags Section -->
+            <div class="mb-3">
+                @foreach (var category in Model.Categories)
+                {
+                    <a href="/blogs/tag/@category.Url"
+                       class="badge bg-@category.Color bg-opacity-10 text-@category.Color mb-2 fw-bold">@category.Text</a>
+                }
+            </div>
+
+            <!-- Post Image -->
+            <img src="~/img/@Model.Image" class="img-fluid rounded mb-4" alt="">
+
+            <!-- Post Content -->
+            <div class="content">
+                @Html.Raw(Model.Content)
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="bg-white mt-4 shadow-sm rounded">
+            <div class="card border-0">
+                <div class="card-header pb-0">
+                    <h4><span id="commentCount">@Model.Comments.Count() adet yorum var.</span></h4>
+                </div>
+                <div class="card-body">
+                    <div id="comments">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="my-4 d-flex align-items-start">
+                                <a href="/profile/@comment.User.UserName">
+                                    <img src="~/img/@comment.User.Image" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" alt="@comment.User.UserName">
+
+                                </a>
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="/profile/@comment.User.UserName" class="text-decoration-none fw-semibold">@comment.User.UserName</a>
+                                    </h6>
+                                    <span class="text-muted small">@comment.PublishedOn</span>
+                                    <p>@comment.Text</p>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <!-- Add Comment Form -->
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <hr class="my-4">
+                        <div>
+                            <h4 class="mb-3">Yorum Ekle</h4>
+                            <form action="/post/AddComment" method="post">
+                                <input type="hidden" id="PostId" name="PostId" value="@Model.PostId">
+                                <div class="mb-3">
+                                    <label for="Text" class="form-label">Yorum</label>
+                                    <textarea type="text" name="Text" id="Text" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" id="btnYorumKayit" class="btn btn-primary">Kaydet</button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>Yorum için uygulamaya giriş yapmalısınız. <a href="/user/login">Login</a></p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar (Categories, New Posts) -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <vc:tags-menu></vc:tags-menu>
+        <vc:new-posts></vc:new-posts>
+        @await Component.InvokeAsync("CategoriesMenu")
+        @await Component.InvokeAsync("NewPosts")
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        a.fw-semibold {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+            a.fw-semibold:hover {
+                text-decoration: underline;
+                color: #0a58ca;
+            }
+
+        /* Card and comment section */
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Avatar styling */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
+
+        /* Post image styling */
+        .img-fluid {
+            border-radius: 8px;
+        }
+
+        /* Hover effect for comments */
+        .my-4.d-flex:hover {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Comment and form styling */
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+                border-color: #0056b3;
+            }
+
+        /* Pagination (if needed) */
+        .pagination {
+            justify-content: center;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 767px) {
+            .col-lg-8 {
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+}
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#btnYorumKayit").click(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AddComment")',
+                    dataType: 'json',
+                    data: {
+                        PostId: $('#PostId').val(),
+                        UserName: $('#UserName').val(),
+                        Text: $('#Text').val(),
+                    },
+                    success: function (yorum) {
+                        if (yorum.success) {
+                            var date = new Date(yorum.publishedOn);
+
+                            
+                            var formattedDate = date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR');
+
+                            $("#comments").append(`
+                                        <div class="my-4 d-flex align-items-start">
+                                            <img src="@Url.Content("~/img/")${yorum.avatar}" class="avatar rounded-circle me-3" alt="User Avatar">
+                                            <div>
+                                                <h6 class="mb-1">${yorum.username}</h6>
+                                                <span class="text-muted small">${formattedDate}</span>
+                                                <p>${yorum.text}</p>
+                                            </div>
+                                        </div>
+                                    `);
+
+                            $("#Text").val(''); 
+
+                            var adet = parseInt($("#commentCount").text());
+                            $("#commentCount").text(adet + 1 + " adet yorum var.");
+
+                            // Başarılı mesajı ayarla ve modalı göster
+                            const successModalEl = document.getElementById('successModal');
+                            if (successModalEl) {
+                                const successModal = new bootstrap.Modal(successModalEl);
+                                const successModalBody = successModalEl.querySelector('.modal-body');
+                                if (successModalBody) {
+                                    successModalBody.textContent = yorum.message;
+                                }
+                                successModal.show();
+
+                                // 2 saniye sonra başarı modali kapanacak
+                                setTimeout(() => {
+                                    successModal.hide();
+                                }, 2000);
+                            }
+                        } else {
+                            alert("Yorum ekleme işlemi başarısız oldu.");
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+}

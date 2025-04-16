@@ -1,0 +1,31 @@
+@model List<CategoryDTO>
+
+@{
+    var currentCategory = ViewContext.RouteData.Values["category"]?.ToString()
+                          ?? ViewContext.HttpContext.Request.Query["category"].ToString();
+}
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <a href="/post/index" class="text-decoration-none text-dark">Kategoriler</a>
+        </h5>
+       
+    </div>
+    <div class="card-body">
+        <ul class="list-inline d-flex flex-wrap gap-2 mb-0">
+            @foreach (var category in Model)
+            {
+                var color = category.Color?.ToString().ToLower() ?? "secondary";
+                var isActive = category.Url == currentCategory;
+                var activeClass = isActive ? $"btn-{color} text-white" : $"btn-outline-{color}";
+
+                <li class="list-inline-item">
+                    <a href="?category=@category.Url" class="btn @activeClass btn-sm category-link">
+                        @category.Text
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>  

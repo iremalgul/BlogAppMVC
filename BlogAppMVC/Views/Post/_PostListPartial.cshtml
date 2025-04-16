@@ -1,0 +1,66 @@
+﻿@model PostViewModel
+
+@if (Model.Posts != null && Model.Posts.Any(p => p.IsActive))
+{
+    @foreach (var post in Model.Posts.Where(p => p.IsActive))
+    {
+        <div class="card mb-4 border-0 shadow-sm hover-shadow">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="~/img/@post.Image" class="img-fluid rounded-start" alt="@post.Title">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="/blogs/@post.Url" class="text-decoration-none text-dark fw-bold">@post.Title</a>
+                        </h5>
+                        <p class="card-text text-muted">@post.Description</p>
+
+                        @foreach (var category in post.Categories)
+                        {
+                            var color = category.Color?.ToString().ToLower() ?? "secondary";
+                            <a href="?category=@category.Url" class="badge bg-@color bg-opacity-25 text-@color me-1 text-decoration-none">
+                                @category.Text
+                            </a>
+                        }
+
+                        <p class="card-text mt-2">
+                            <small class="text-muted">
+                                <img src="~/img/@post.User.Image" class="rounded-circle me-1" alt="Yazar" style="width: 32px; height: 32px; object-fit: cover;" />
+                                <a href="/profile/@post.User.UserName" class="fw-semibold text-decoration-none">@post.User.UserName</a> • Yayınlanma tarihi: @post.PublishedOn.ToShortDateString()
+                            </small>
+                        </p>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                string active = Model.CurrentPage == i ? "active" : "";
+                string categoryQuery = !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["category"])
+                ? $"&category={ViewContext.HttpContext.Request.Query["category"]}"
+                : "";
+
+                <li class="page-item @active">
+                    <a class="page-link" href="?page=@i@Html.Raw(categoryQuery)">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+
+}
+else
+{
+    <div class="alert alert-info text-center">
+        Henüz yayınlanmış bir gönderi bulunmamaktadır.
+    </div>
+}

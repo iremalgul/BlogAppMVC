@@ -1,0 +1,39 @@
+﻿@{
+    Layout = "_Layout";
+}
+@model PostViewModel
+
+<div class="row">
+    <!-- Main content -->
+    <div class="col-lg-8">
+        <div class="bg-white p-4 shadow-sm rounded">
+            <h1 class="h4 mb-4 text-primary border-bottom pb-2">Popüler Gönderiler</h1>
+
+            <div id="postListContainer">
+                @await Html.PartialAsync("_PostListPartial", Model)
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <vc:categories-menu></vc:categories-menu>
+        <vc:new-posts></vc:new-posts>
+        @await Component.InvokeAsync("CategoriesMenu")
+        @await Component.InvokeAsync("NewPosts")
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.category-link, .page-link', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                $.get(url, function (data) {
+                    $('#postListContainer').html(data);
+                });
+            });
+        });
+    </script>
+}
+
