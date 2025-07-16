@@ -1,7 +1,7 @@
 # BlogAppMVC
 
 ### 📹 Proje Tanıtım Videosu
-[![Proje Tanıtım Videosu](https://youtu.be/s9ojmGy57W8)
+[![Proje Tanıtım Videosu](https://img.youtube.com/vi/s9ojmGy57W8/0.jpg)](https://youtu.be/s9ojmGy57W8)
 
 ## Proje Özeti
 
